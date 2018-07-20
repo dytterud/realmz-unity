@@ -5,23 +5,55 @@ using UnityEngine;
 public class Movement : MonoBehaviour {
 
     public AdventureManager adventureManager;
+    public float inputDelay = 0.2f;
+
+    private KeyCode keyPressed = KeyCode.None;
+    private float inputDelayElapsed = 0f;
+
 
     // Use this for initialization
     void Start () {
         adventureManager = GameObject.Find("Adventure").GetComponent<AdventureManager>();
     }
-	
-	// Update is called once per frame
-	void Update () {
+    
+    // Update is called once per frame
+    void Update () {
         if (!Input.anyKey)
             return;
 
-        var key = GetKey();
+        var newKey = GetKey();
+
+        if(newKey == KeyCode.None) // no new key
+        {
+            if (Input.GetKey(keyPressed)) // prev key is still pressed
+            { 
+                inputDelayElapsed += Time.deltaTime;
+                if(inputDelayElapsed > inputDelay)
+                {
+                    newKey = keyPressed;
+                    inputDelayElapsed = 0f;
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                keyPressed = KeyCode.None;
+            }
+        }
+        else
+        {
+            keyPressed = newKey;
+            inputDelayElapsed = -0.4f; // wait longer first time
+        }
+
 
         var NewX = 0;
         var NewY = 0;
 
-        switch (key)
+        switch (newKey)
         {
             case KeyCode.UpArrow:
                 NewY = -1;
@@ -53,10 +85,7 @@ public class Movement : MonoBehaviour {
                 return key;
             }
         }
-        //if (!Input.GetKey(KeyPressed))
-        //{
-        //    KeyPressed = KeyCode.None;
-        //}
+
         return KeyCode.None;
     }
 }

@@ -342,3 +342,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   adventureManager: {fileID: 0}
+  inputDelay: 0.2
