@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -78,5 +79,10 @@ public class AdventureManager : MonoBehaviour {
 
 
 
+    }
+
+    internal int GetBaseTile()
+    {
+        return tilesets[level].base_tile_id;
     }
 }
