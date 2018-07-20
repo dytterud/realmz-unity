@@ -40,18 +40,43 @@ public class AdventureManager : MonoBehaviour {
 
     void HandleMovement(int x, int y, int level)
     {
-        Debug.Log("Tile " + levelData.TileId(x, y, level) + " " + levelData.TileIdNormalized(x, y, level));
+
+        // is outside map
+        if (x < 0 || x > 89 || y < 0 || y > 89)
+            return;
+
+        var tileId = levelData.TileId(x, y, level);
+        var tileIdNormalized = tileId % 1000;
+        
+        // is blocked
+        if(tileIdNormalized >= 1 && tileIdNormalized <= 200) // normal tile
+        {
+            var tile = tilesets[level].tiles[tileIdNormalized];
+            if (tile.solid_type == 2)
+                return;
+
+            Debug.Log("Normal tile " + tileId+" solid "+tile.solid_type);
+
+        }
+        else // special tile
+        {
+            Debug.Log("Special tile " + tileId);
+        }
+
         // get new pos
 
-        // is blocked
         // is AP
 
         // move
-
-        // check surounding secret
-        //
-
         this.x = x;
         this.y = y;
+
+        // play sound
+
+
+        // check surounding secret
+
+
+
     }
 }
