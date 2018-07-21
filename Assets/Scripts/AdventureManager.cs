@@ -12,6 +12,7 @@ public class AdventureManager : MonoBehaviour {
     public ScenarioData scenarioData;
     public LevelData levelData;
     public Tileset[] tilesets = new Tileset[11];
+    public bool[] solidSpecial;
 
     TileRenderer tileRenderer;
 
@@ -19,6 +20,8 @@ public class AdventureManager : MonoBehaviour {
     void Start () {
         levelData = LevelData.Parse(Application.dataPath + "/Resources/Scenarios/City Of Bywater/Data LD");
         scenarioData = ScenarioData.Parse(Application.dataPath + "/Resources/Scenarios/City Of Bywater/City of Bywater");
+        solidSpecial = Solid.Parse(Application.dataPath + "/Resources/Scenarios/City Of Bywater/Data Solids");
+
         tilesets[0] = Tileset.Parse(Application.dataPath + "/Resources/Data files/Data P BD");
 
         x = scenarioData.StartX;
@@ -62,6 +65,8 @@ public class AdventureManager : MonoBehaviour {
         else // special tile
         {
             Debug.Log("Special tile " + tileId);
+            if (solidSpecial[Math.Abs(tileIdNormalized)])
+                return;
         }
 
         // get new pos
