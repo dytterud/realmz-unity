@@ -51,20 +51,38 @@ public class AdventureManager : MonoBehaviour {
 
         var tileId = levelData.TileId(x, y, level);
         var tileIdNormalized = tileId % 1000;
-        
+
+        if (tileId <= -3000 || tileId > 3000) // secret
+        {
+            // chanse of discover?? take from character
+            // if found
+            // add s
+            // change ap code from 3xx to 1xxx
+
+            // else
+        }
+
+        if ((tileId <= -1000 && tileId > -3000) || (tileId > 1000 && tileId < 3000)) // action point
+        {
+            Debug.Log("AP " + tileId);
+            var locCode = x + y * 100 + level * 10000;
+
+            Move(x, y, level);
+
+
+
+            return;
+        }
+
         // is blocked
-        if(tileIdNormalized >= 1 && tileIdNormalized <= 200) // normal tile
+        if (tileIdNormalized >= 1 && tileIdNormalized <= 200) // normal tile
         {
             var tile = tilesets[level].tiles[tileIdNormalized];
             if (tile.solid_type == 2)
                 return;
-
-            Debug.Log("Normal tile " + tileId+" solid "+tile.solid_type);
-
         }
         else // special tile
         {
-            Debug.Log("Special tile " + tileId);
             if (solidSpecial[Math.Abs(tileIdNormalized)])
                 return;
         }
@@ -73,17 +91,22 @@ public class AdventureManager : MonoBehaviour {
 
         // is AP
 
-        // move
-        this.x = x;
-        this.y = y;
-
-        // play sound
+        Move(x, y, level);
 
 
         // check surounding secret
 
 
 
+    }
+
+    private void Move(int x, int y, int level)
+    {
+        // move
+        this.x = x;
+        this.y = y;
+
+        // play sound
     }
 
     internal int GetBaseTile()
