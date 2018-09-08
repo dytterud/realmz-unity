@@ -1,45 +1,37 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class AdventureManager : MonoBehaviour {
+    public int prev_x;
+    public int prev_y;
+    public int prev_level;
 
-    public int x;
-    public int y;
-    public int level;
-
-    public ScenarioData scenarioData;
-    public LevelData levelData;
-    public Tileset[] tilesets = new Tileset[11];
-    public bool[] solidSpecial;
-
-    TileRenderer tileRenderer;
+    public TileRenderer tileRenderer;
+    public TextHandler textHandler;
+    public ActionPointHandler actionPointHandler;
+    public SimpleEncounterHandler simpleEncounterHandler;
 
     // Use this for initialization
     void Start () {
-        levelData = LevelData.Parse(Application.dataPath + "/Resources/Scenarios/City Of Bywater/Data LD");
-        scenarioData = ScenarioData.Parse(Application.dataPath + "/Resources/Scenarios/City Of Bywater/City of Bywater");
-        solidSpecial = Solid.Parse(Application.dataPath + "/Resources/Scenarios/City Of Bywater/Data Solids");
+        GameData.AdventureManager = this;
 
-        tilesets[0] = Tileset.Parse(Application.dataPath + "/Resources/Data files/Data P BD");
-
-        x = scenarioData.StartX;
-        y = scenarioData.StartY;
-        level = scenarioData.StartLevel;
-
-        tileRenderer = gameObject.AddComponent<TileRenderer>();
-        tileRenderer.adventureManager = this;
+        tileRenderer = gameObject.GetComponent<TileRenderer>();
+        textHandler = gameObject.GetComponent<TextHandler>();
+        actionPointHandler = gameObject.GetComponent<ActionPointHandler>();
+        simpleEncounterHandler = gameObject.GetComponent<SimpleEncounterHandler>();
     }
     
     // Update is called once per frame
     void Update () {
-        
+
     }
 
     public void MoveRelative(int x, int y)
     {
-        HandleMovement(this.x + x, this.y + y, this.level);
+        HandleMovement(GameData.x + x, GameData.y + y, GameData.level);
     }
 
     void HandleMovement(int x, int y, int level)
@@ -49,8 +41,7 @@ public class AdventureManager : MonoBehaviour {
         if (x < 0 || x > 89 || y < 0 || y > 89)
             return;
 
-        var tileId = levelData.TileId(x, y, level);
-        var tileIdNormalized = tileId % 1000;
+        var tileId = GameData.LevelData.TileId(x, y, level);
 
         if (tileId <= -3000 || tileId > 3000) // secret
         {
@@ -65,25 +56,24 @@ public class AdventureManager : MonoBehaviour {
         if ((tileId <= -1000 && tileId > -3000) || (tileId > 1000 && tileId < 3000)) // action point
         {
             Debug.Log("AP " + tileId);
-            var locCode = x + y * 100 + level * 10000;
-
             Move(x, y, level);
-
-
-
+            actionPointHandler.Handle(x, y, level);
             return;
         }
+
+        var tileIdNormalized = tileId % 1000;
 
         // is blocked
         if (tileIdNormalized >= 1 && tileIdNormalized <= 200) // normal tile
         {
-            var tile = tilesets[level].tiles[tileIdNormalized];
+            var landId = GameData.LevelMetaData[level].LandType;
+            var tile = GameData.Tilesets[landId].tiles[tileIdNormalized];
             if (tile.solid_type == 2)
                 return;
         }
         else // special tile
         {
-            if (solidSpecial[Math.Abs(tileIdNormalized)])
+            if (GameData.SolidSpecial[Math.Abs(tileIdNormalized)])
                 return;
         }
 
@@ -92,25 +82,30 @@ public class AdventureManager : MonoBehaviour {
         // is AP
 
         Move(x, y, level);
-
-
-        // check surounding secret
-
-
-
     }
 
-    private void Move(int x, int y, int level)
+    public void Move(int x, int y, int level)
     {
         // move
-        this.x = x;
-        this.y = y;
+        prev_x = GameData.x;
+        GameData.x = x;
+        prev_y = GameData.y;
+        GameData.y = y;
+        prev_level = level;
+        GameData.level = level;
 
         // play sound
+
+        // add time
+            // check surounding secret
+            // random event
+
     }
 
-    internal int GetBaseTile()
+    public void MoveBack()
     {
-        return tilesets[level].base_tile_id;
+        GameData.x = prev_x;
+        GameData.y = prev_y;
     }
+
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public static class Helpers
@@ -37,5 +38,10 @@ public static class Helpers
     {
         Array.Reverse(value);
         return value;
+    }
+
+    public static string ToPrettyString(this short[] value, string delimiter = ",")
+    {
+        return string.Join(delimiter, value.Select(c => c.ToString()).ToArray());
     }
 }

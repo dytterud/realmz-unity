@@ -8,47 +8,55 @@ using UnityEngine.Tilemaps;
 public class TileRenderer : MonoBehaviour {
     private Tilemap groundTilemap;
     private Tilemap specialTilemap;
-    internal AdventureManager adventureManager;
+    public AdventureManager adventureManager;
+    public GameObject grid;
+
+    private int ActiveLevel = -1;
 
     // Use this for initialization
     void Start () {
-        GameObject go = new GameObject("Grid");
-        go.AddComponent<Grid>();
-
-        var groundGo = new GameObject("Ground");
-        groundGo.transform.parent = go.transform;
-        groundTilemap = groundGo.AddComponent<Tilemap>();
-        groundGo.AddComponent<TilemapRenderer>();
-
-        var specialGo = new GameObject("Special");
-        specialGo.transform.parent = go.transform;
-        specialTilemap = specialGo.AddComponent<Tilemap>();
-        specialGo.AddComponent<TilemapRenderer>();
-
-        Render();
+        Setup();
     }
 
 
     // Update is called once per frame
     void Update () {
-        
+        if(GameData.level != ActiveLevel)
+        {
+            ActiveLevel = GameData.level;
+            Render();
+        }
+    }
+
+    public void Setup()
+    {
+        var groundGo = new GameObject("Ground");
+        groundGo.transform.parent = grid.transform;
+        groundTilemap = groundGo.AddComponent<Tilemap>();
+        groundGo.AddComponent<TilemapRenderer>();
+
+        var specialGo = new GameObject("Special");
+        specialGo.transform.parent = grid.transform;
+        specialTilemap = specialGo.AddComponent<Tilemap>();
+        specialGo.AddComponent<TilemapRenderer>();
     }
 
     public void Render()
     {
-        var level = adventureManager.level;
+        var landId = GameData.LevelMetaData[GameData.level].LandType;
 
-        Sprite[] sprites = Resources.LoadAll<Sprite>(GetSprite(level));
-        Sprite[] icons = Resources.LoadAll<Sprite>("Data Files/The Family Jewels/cicn/");
-        var iconsMap = icons.ToDictionary(x => x.name, x => x);
-        short[,] tiles = adventureManager.levelData.GetTiles(level);
+        var sprites = GameData.TileSprites[landId];
+        var iconsMap = GameData.Icons;
+        short[,] tiles = GameData.LevelData.GetTiles(ActiveLevel);
 
-        var baseTileId = adventureManager.GetBaseTile();
+        var baseTileId = GameData.Tilesets[landId].base_tile_id - 1;
 
         Tile m_Tile = ScriptableObject.CreateInstance<Tile>();
         Tile s_Tile = ScriptableObject.CreateInstance<Tile>();
 
         groundTilemap.ClearAllTiles();
+        specialTilemap.ClearAllTiles();
+
         int tileId;
         for (int y = 0; y < 90; y++)
         {
@@ -75,15 +83,24 @@ public class TileRenderer : MonoBehaviour {
         }
     }
 
-    private string GetSprite(int level)
+    public void Alter(short level, short x, short y, short tileId, bool isDungeon)
     {
-        var path = "Data Files/The Family Jewels/pict/";
-        switch (level)
+        Tile newTile = ScriptableObject.CreateInstance<Tile>();
+        Vector3Int p = new Vector3Int(x, -y, 0);
+
+        if (tileId > 200 || tileId < 0) // special tile
         {
-            case 0:
-                return path + "00300";
-            default:
-                throw new Exception();
+            var name = (tileId + 1).ToString("D5");
+            newTile.sprite = GameData.Icons[name];
+            specialTilemap.SetTile(p, newTile);
+        }
+        else // normal tile
+        {
+            var landId = GameData.LevelMetaData[GameData.level].LandType;
+            var sprites = GameData.TileSprites[landId];
+            newTile.sprite = sprites[tileId];
+            groundTilemap.SetTile(p, newTile);
+            specialTilemap.SetTile(p, null);
         }
     }
 }

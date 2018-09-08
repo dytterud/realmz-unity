@@ -5,12 +5,12 @@ using UnityEngine;
 public class PartyController : MonoBehaviour
 {
 
-    public AdventureManager adventureManager;
+    //public AdventureManager adventureManager;
 
     // Use this for initialization
     void Start()
     {
-        adventureManager = GameObject.Find("Adventure").GetComponent<AdventureManager>();
+        //adventureManager = GameObject.Find("Adventure").GetComponent<AdventureManager>();
     }
 
     // Update is called once per frame
@@ -21,6 +21,6 @@ public class PartyController : MonoBehaviour
 
     Vector3 PartyPos()
     {
-        return new Vector3(adventureManager.x + 0.5f, 0.5f - adventureManager.y);
+        return new Vector3(GameData.x + 0.5f, 0.5f - GameData.y);
     }
 }
